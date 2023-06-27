@@ -10,15 +10,15 @@
 class Shader;
 
 struct EdgeEquation {
-    VectorI3D I, J, K;
+    Vector3D I, J, K;
     bool topLeftFlag[3];
     int twoArea;
     float delta;
     EdgeEquation(const Triangle& tri);
-    VectorI3D GetResult(int x, int y);
-    void UpX(VectorI3D& res);
-    void UpY(VectorI3D& res);
-    Vector3D GetBarycentric(VectorI3D val);
+    Vector3D GetResult(float x, float y);
+    void UpX(Vector3D& res);
+    void UpY(Vector3D& res);
+    Vector3D GetBarycentric(Vector3D val);
 };
 
 class RendererDevice {

@@ -30,20 +30,20 @@ EdgeEquation::EdgeEquation(const Triangle& tri) {
     delta = 1.f / twoArea;
 }
 
-VectorI3D EdgeEquation::GetResult(int x, int y) {
-    VectorI3D res = I * y + J * x + K;
+Vector3D EdgeEquation::GetResult(float x, float y) {
+    Vector3D res = I * y + J * x + K;
     return res;
 }
 
-void EdgeEquation::UpX(VectorI3D& res) {
+void EdgeEquation::UpX(Vector3D& res) {
     res += J;
 }
 
-void EdgeEquation::UpY(VectorI3D& res) {
+void EdgeEquation::UpY(Vector3D& res) {
     res += I;
 }
 
-Vector3D EdgeEquation::GetBarycentric(VectorI3D val) {
+Vector3D EdgeEquation::GetBarycentric(Vector3D val) {
     Vector3D res;
     res.x = val.y * delta;
     res.y = val.z * delta;
@@ -139,9 +139,9 @@ void RendererDevice::RasterizationTriangle(Triangle& tri) {
     }
     if(edge.twoArea == 0) return;
     Fragment frag;
-    VectorI3D cy = edge.GetResult(xMin, yMin);
+    Vector3D cy = edge.GetResult(xMin + 0.5f, yMin + 0.5f);
     for(int y = yMin; y <= yMax; y++) {
-        VectorI3D cx = cy;
+        Vector3D cx = cy;
         for(int x = xMin; x <= xMax; x++) {
             if(JudgeInsideTriangle(edge, cx)) {
                 Vector3D barycentric = edge.GetBarycentric(cx);
@@ -203,10 +203,10 @@ CoordI4D RendererDevice::GetBoundingBox(Triangle& tri) {
     int xMax = 0;
     int yMax = 0;
     for(int i = 0; i < 3; i++) {
-        xMin = std::min(xMin, tri[i].screenSpacePos.x);
-        yMin = std::min(yMin, tri[i].screenSpacePos.y);
-        xMax = std::max(xMax, tri[i].screenSpacePos.x);
-        yMax = std::max(yMax, tri[i].screenSpacePos.y);
+        xMin = std::min(xMin, static_cast<int>(tri[i].screenSpacePos.x));
+        yMin = std::min(yMin, static_cast<int>(tri[i].screenSpacePos.y));
+        xMax = std::max(xMax, static_cast<int>(tri[i].screenSpacePos.x) + 1);
+        yMax = std::max(yMax, static_cast<int>(tri[i].screenSpacePos.y) + 1);
     }
     CoordI4D res(xMin > 0 ? xMin : 0, yMin > 0 ? yMin : 0, xMax < with - 1 ? xMax : with - 1, yMax < height - 1 ? yMax : height - 1);
     return res;

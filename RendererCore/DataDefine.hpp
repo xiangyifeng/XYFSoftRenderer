@@ -36,7 +36,7 @@ struct Vertex {
     Coord3D worldSpacePos;
     Coord4D clipSpacePos;
     Coord4D ndcSpacePos;
-    CoordI2D screenSpacePos;
+    Coord2D screenSpacePos;
     float screenDepth;
     Vector3D normal;
     Coord2D texCoord;
