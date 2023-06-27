@@ -5,7 +5,15 @@ FrameBuffer::FrameBuffer(int h, int w) : height(h), with(w), depthBuffer(w * h),
     std::fill(depthBuffer.begin(), depthBuffer.end(), 1.f);
 }
 
-bool FrameBuffer::JudgeDepth(int x, int y, float depth) {
+// bool FrameBuffer::JudgeDepth(int x, int y, float depth) {
+//     if(depth < depthBuffer[y * with + x]) {
+//         depthBuffer[y * with + x] = depth;
+//         return true;
+//     }
+//     return false;
+// }
+
+bool FrameBuffer::JudgeDepth(float x, float y, float depth) {
     if(depth < depthBuffer[y * with + x]) {
         depthBuffer[y * with + x] = depth;
         return true;

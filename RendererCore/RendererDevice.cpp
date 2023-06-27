@@ -51,7 +51,7 @@ Vector3D EdgeEquation::GetBarycentric(Vector3D val) {
     return res;
 }
 
-RendererDevice::RendererDevice(int w, int h) : shader(nullptr), with(w), height(h), framebuffer(w, h) {
+RendererDevice::RendererDevice(int w, int h) : shader(nullptr), with(w), height(h), framebuffer(w, h), MSAAFramebuffer(2 * w, 2 * h) {
     //near
     viewPlanes[0] = {0.f, 0.f, 1.f, 1.f};
     //far
@@ -143,13 +143,37 @@ void RendererDevice::RasterizationTriangle(Triangle& tri) {
     for(int y = yMin; y <= yMax; y++) {
         Vector3D cx = cy;
         for(int x = xMin; x <= xMax; x++) {
-            if(JudgeInsideTriangle(edge, cx)) {
-                Vector3D barycentric = edge.GetBarycentric(cx);
-                float depth = CalculateInterpolation<float>(tri[0].screenDepth, tri[1].screenDepth, tri[2].screenDepth, barycentric);
-                if(framebuffer.JudgeDepth(x, y, depth)) {
+            if(MSAA) {
+                int count = 0;
+                for(int i = 0; i < 4; i++) {
+                    float sampleX = x + xOffset[i];
+                    float sampleY = y + yOffset[i];
+                    Vector3D sampleRes = edge.GetResult(sampleX, sampleY);
+                    if(JudgeInsideTriangle(edge, sampleRes)) {
+                        Vector3D barycentric = edge.GetBarycentric(sampleRes);
+                        float depth = CalculateInterpolation<float>(tri[0].screenDepth, tri[1].screenDepth, tri[2].screenDepth, barycentric);
+                        if(framebuffer.JudgeDepth(2 * x, 2 * y, depth)) {
+                            count++;
+                        }
+                    }
+                }
+                if(count > 0) {
+                    Vector3D barycentric = edge.GetBarycentric(cx);
+                    float depth = CalculateInterpolation<float>(tri[0].screenDepth, tri[1].screenDepth, tri[2].screenDepth, barycentric);
                     frag = ConstructFragment(x, y, depth, tri, barycentric);
                     shader->FragmentShader(frag);
-                    framebuffer.SetPixel(x, y, frag.fragmentColor);
+                    framebuffer.SetPixel(x, y, frag.fragmentColor * (count / 4.f));
+                }
+            }
+            else {
+                if(JudgeInsideTriangle(edge, cx)) {
+                    Vector3D barycentric = edge.GetBarycentric(cx);
+                    float depth = CalculateInterpolation<float>(tri[0].screenDepth, tri[1].screenDepth, tri[2].screenDepth, barycentric);
+                    if(framebuffer.JudgeDepth(x, y, depth)) {
+                        frag = ConstructFragment(x, y, depth, tri, barycentric);
+                        shader->FragmentShader(frag);
+                        framebuffer.SetPixel(x, y, frag.fragmentColor);
+                    }
                 }
             }
             edge.UpX(cx);

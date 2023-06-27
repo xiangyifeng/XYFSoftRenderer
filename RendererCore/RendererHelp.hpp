@@ -7,7 +7,7 @@ static inline bool JudgeOnTopLeftEdge(CoordI2D v0, CoordI2D v1) {
     return (v0.y > v1.y || (v0.y == v1.y && (v0.x > v1.x)));
 }
 
-static inline bool JudgeInsideTriangle(EdgeEquation& triEdge, VectorI3D res) {
+static inline bool JudgeInsideTriangle(EdgeEquation& triEdge, Vector3D res) {
     bool flag = true;
     if(res.x == 0) {
         flag &= triEdge.topLeftFlag[0];

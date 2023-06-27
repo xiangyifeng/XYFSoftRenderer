@@ -48,8 +48,11 @@ private:
     int with;
     int height;
     FrameBuffer framebuffer;
+    FrameBuffer MSAAFramebuffer;
     std::array<Vector4D, 6> viewPlanes;
     std::array<Vector3D, 4> screenLines;
+    std::array<float, 4> xOffset = {0.25f, 0.25f, 0.75f, 0.75f};
+    std::array<float, 4> yOffset = {0.25f, 0.75f, 0.25f, 0.75f};
     void ProcessTriangle(Triangle& tri);
     void RasterizationTriangle(Triangle& tri);
     void WireFrameTriangle(Triangle& tri);
