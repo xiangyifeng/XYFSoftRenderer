@@ -40,7 +40,7 @@
      <enum>Qt::LeftToRight</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="Environment">
      <attribute name="title">
@@ -322,7 +322,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="checkBox_3">
+         <widget class="QCheckBox" name="MSAACheckBox">
           <property name="text">
            <string>MSAA</string>
           </property>

@@ -43,12 +43,13 @@ public:
     static RendererDevice& GetInstance(int w = 800, int h = 600);
     void SetMultiThread(bool isSet);
     void SetFaceCulling(bool isCulling);
+    void SetMSAA(bool isMSAA);
 private:
     static RendererDevice* instance;
     int with;
     int height;
     FrameBuffer framebuffer;
-    FrameBuffer MSAAFramebuffer;
+    //FrameBuffer MSAAFramebuffer;
     std::array<Vector4D, 6> viewPlanes;
     std::array<Vector3D, 4> screenLines;
     std::array<float, 4> xOffset = {0.25f, 0.25f, 0.75f, 0.75f};

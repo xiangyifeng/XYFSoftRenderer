@@ -10,12 +10,12 @@
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
-            "environment": [
-                {
-                    "name": "PATH",
-                    "value": "E:/Qt/6.2.4/mingw_64/bin"
-                }
-            ],
+            // "environment": [
+            //     {
+            //         "name": "PATH",
+            //         "value": "E:/Qt/6.2.4/mingw_64/bin"
+            //     }
+            // ],
             "externalConsole": false,
             "miDebuggerPath": "E:/Qt/Tools/mingw1120_64/bin/gdb.exe",
             "visualizerFile": "c:\\Users\\xiangyifeng\\AppData\\Roaming\\Code\\User\\workspaceStorage\\93b2eea1cac3d3e84326cf06ec3d4e65\\tonka3000.qtvsctools\\qt.natvis.xml"

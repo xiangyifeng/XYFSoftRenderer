@@ -51,7 +51,7 @@ Vector3D EdgeEquation::GetBarycentric(Vector3D val) {
     return res;
 }
 
-RendererDevice::RendererDevice(int w, int h) : shader(nullptr), with(w), height(h), framebuffer(w, h), MSAAFramebuffer(2 * w, 2 * h) {
+RendererDevice::RendererDevice(int w, int h) : shader(nullptr), with(w), height(h), framebuffer(w, h) {
     //near
     viewPlanes[0] = {0.f, 0.f, 1.f, 1.f};
     //far
@@ -95,6 +95,10 @@ void RendererDevice::Render() {
             ProcessTriangle(triangleList[i]);
         }
     }
+    if(MSAA) {
+        framebuffer.RenderImage();
+    }
+    
 }
 
 void RendererDevice::Init(int w, int h) {
@@ -114,6 +118,11 @@ void RendererDevice::SetMultiThread(bool isSet) {
 
 void RendererDevice::SetFaceCulling(bool isCulling) {
     faceCulling = isCulling;
+}
+
+void RendererDevice::SetMSAA(bool isMSAA) {
+    MSAA = isMSAA;
+    framebuffer.SetMSAA(isMSAA);
 }
 
 void RendererDevice::ProcessTriangle(Triangle& tri) {
@@ -144,31 +153,35 @@ void RendererDevice::RasterizationTriangle(Triangle& tri) {
         Vector3D cx = cy;
         for(int x = xMin; x <= xMax; x++) {
             if(MSAA) {
+                bool isInside = false;
                 int count = 0;
+                Vector3D barycentric = edge.GetBarycentric(cx);
+                float depth = CalculateInterpolation<float>(tri[0].screenDepth, tri[1].screenDepth, tri[2].screenDepth, barycentric);
                 for(int i = 0; i < 4; i++) {
-                    float sampleX = x + xOffset[i];
-                    float sampleY = y + yOffset[i];
+                    float sampleX = (float)x + xOffset[i];
+                    float sampleY = (float)y + yOffset[i];
                     Vector3D sampleRes = edge.GetResult(sampleX, sampleY);
                     if(JudgeInsideTriangle(edge, sampleRes)) {
                         Vector3D barycentric = edge.GetBarycentric(sampleRes);
-                        float depth = CalculateInterpolation<float>(tri[0].screenDepth, tri[1].screenDepth, tri[2].screenDepth, barycentric);
-                        if(framebuffer.JudgeDepth(2 * x, 2 * y, depth)) {
-                            count++;
+                        float depth = CorrectPerspectiveInterpolation<float>({tri[0].screenDepth, tri[1].screenDepth, tri[2].screenDepth}, tri, barycentric);
+                        if(framebuffer.JudgeDepthWithMSAA(static_cast<int>(2 * sampleX), static_cast<int>(sampleY * 2), depth)) {
+                            if(!isInside) {
+                                isInside = true;
+                                frag = ConstructFragment(x, y, depth, tri, barycentric);
+                                shader->FragmentShader(frag);
+                                framebuffer.SetPixelWithMSAA(x, y, i, frag.fragmentColor);
+                            }
+                            else {
+                                framebuffer.SetPixelWithMSAA(x, y, i, frag.fragmentColor);
+                            }
                         }
                     }
-                }
-                if(count > 0) {
-                    Vector3D barycentric = edge.GetBarycentric(cx);
-                    float depth = CalculateInterpolation<float>(tri[0].screenDepth, tri[1].screenDepth, tri[2].screenDepth, barycentric);
-                    frag = ConstructFragment(x, y, depth, tri, barycentric);
-                    shader->FragmentShader(frag);
-                    framebuffer.SetPixel(x, y, frag.fragmentColor * (count / 4.f));
                 }
             }
             else {
                 if(JudgeInsideTriangle(edge, cx)) {
                     Vector3D barycentric = edge.GetBarycentric(cx);
-                    float depth = CalculateInterpolation<float>(tri[0].screenDepth, tri[1].screenDepth, tri[2].screenDepth, barycentric);
+                    float depth = CorrectPerspectiveInterpolation<float>({tri[0].screenDepth, tri[1].screenDepth, tri[2].screenDepth}, tri, barycentric);
                     if(framebuffer.JudgeDepth(x, y, depth)) {
                         frag = ConstructFragment(x, y, depth, tri, barycentric);
                         shader->FragmentShader(frag);
@@ -192,8 +205,8 @@ void RendererDevice::ConvertToScreen(Triangle& tri) {
     for(int i = 0; i < 3; i++) {
         // float x = static_cast<int>(0.5f * with + tri[i].ndcSpacePos.x * with);
         // float y = static_cast<int>(0.5f * height + tri[i].ndcSpacePos.y * height);
-        tri[i].screenSpacePos.x = static_cast<int>(0.5f * with + tri[i].ndcSpacePos.x * with) - 800;
-        tri[i].screenSpacePos.y = static_cast<int>(0.5f * height + tri[i].ndcSpacePos.y * height) - 250;
+        tri[i].screenSpacePos.x = static_cast<int>(0.5f * with + tri[i].ndcSpacePos.x * with) - 800.f;
+        tri[i].screenSpacePos.y = static_cast<int>(0.5f * height + tri[i].ndcSpacePos.y * height) - 250.f;
         tri[i].screenDepth = tri[i].ndcSpacePos.z;
     }
 }

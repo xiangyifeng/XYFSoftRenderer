@@ -10,8 +10,8 @@
 #include "RenderWidget.h"
 
 
-#define DEFAULT_WIDTH 2560
-#define DEFAULT_HEIGHT 1440
+#define DEFAULT_WIDTH 2560.f
+#define DEFAULT_HEIGHT 1440.f
 #define FIXED_CAMERA_FAR 100.f
 
 class XYFSoftRender : public QMainWindow {
@@ -63,4 +63,5 @@ private Q_SLOTS:
     void on_RollSlider_valueChanged(int value);
     void on_MultiThreadCheckBox_clicked();
     void on_FaceCullingCheckBox_clicked();
+    void on_MSAACheckBox_clicked();
 };

@@ -181,6 +181,15 @@ void XYFSoftRender::on_MultiThreadCheckBox_clicked() {
     }
 }
 
+void XYFSoftRender::on_MSAACheckBox_clicked() {
+    if(ui->MSAACheckBox->isChecked()) {
+        RendererDevice::GetInstance().SetMSAA(true);
+    }
+    else {
+        RendererDevice::GetInstance().SetMSAA(false);
+    }
+}
+
 void XYFSoftRender::on_FaceCullingCheckBox_clicked() {
     if(ui->FaceCullingCheckBox->isChecked()) {
         RendererDevice::GetInstance().SetFaceCulling(true);
