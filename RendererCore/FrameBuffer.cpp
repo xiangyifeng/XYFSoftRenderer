@@ -16,9 +16,9 @@ bool FrameBuffer::JudgeDepth(int x, int y, float depth) {
     return false;
 }
 
-bool FrameBuffer::JudgeDepthWithMSAA(int x, int y, float depth) {
-    if(depth < MSAADepthBuffer[y * with * 2 + x]) {
-        MSAADepthBuffer[y * with * 2 + x] = depth;
+bool FrameBuffer::JudgeDepthWithMSAA(int x, int y, int i, float depth) {
+    if(depth < MSAADepthBuffer[(y * with + x) * 4 + i]) {
+        MSAADepthBuffer[(y * with + x) * 4 + i] = depth;
         return true;
     }
     return false;

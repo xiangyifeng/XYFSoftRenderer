@@ -10,7 +10,7 @@ class FrameBuffer {
 public:
     FrameBuffer(int h, int w);
     bool JudgeDepth(int x, int y, float depth);
-    bool JudgeDepthWithMSAA(int x, int y, float depth);
+    bool JudgeDepthWithMSAA(int x, int y, int i, float depth);
     void SetPixel(int x, int y, Color color);
     void AddPixel(int x, int y, Color color);
     void SetPixelWithMSAA(int x, int y, int i, Color color);

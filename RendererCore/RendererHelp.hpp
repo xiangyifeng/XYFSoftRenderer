@@ -21,17 +21,6 @@ static inline bool JudgeInsideTriangle(EdgeEquation& triEdge, Vector3D res) {
     return flag && ((res.x >= 0 && res.y >= 0 && res.z >= 0) || (res.x <= 0 && res.y <= 0 && res.z <= 0));
 }
 
-static inline bool JudgeInsideTriangle2(Triangle& tri, float x, float y) {
-    Vector2D pos = {x, y};
-    auto AB = tri[1].screenSpacePos - tri[0].screenSpacePos;
-    auto BC = tri[2].screenSpacePos - tri[1].screenSpacePos;
-    auto CA = tri[0].screenSpacePos - tri[2].screenSpacePos;
-    auto AP = pos - tri[0].screenSpacePos;
-    auto BP = pos - tri[1].screenSpacePos;
-    auto CP = pos - tri[2].screenSpacePos;
-    return ((AB.x * AP.y - AB.y * AP.x) > 0 && (BC.x * BP.y - BC.y * BP.x > 0) && (CA.x * CP.y - CA.y * CP.x > 0));
-}
-
 template<class T>
 static inline T CalculateInterpolation(T a, T b, T c, Vector3D& barycentric) {
     return a * barycentric.x + b * barycentric.y + c * barycentric.z;

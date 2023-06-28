@@ -164,7 +164,7 @@ void RendererDevice::RasterizationTriangle(Triangle& tri) {
                     if(JudgeInsideTriangle(edge, sampleRes)) {
                         Vector3D barycentric = edge.GetBarycentric(sampleRes);
                         float depth = CorrectPerspectiveInterpolation<float>({tri[0].screenDepth, tri[1].screenDepth, tri[2].screenDepth}, tri, barycentric);
-                        if(framebuffer.JudgeDepthWithMSAA(static_cast<int>(2 * sampleX), static_cast<int>(sampleY * 2), depth)) {
+                        if(framebuffer.JudgeDepthWithMSAA(x, y, i, depth)) {
                             if(!isInside) {
                                 isInside = true;
                                 frag = ConstructFragment(x, y, depth, tri, barycentric);
@@ -203,8 +203,6 @@ void RendererDevice::DrawLine(Line& line) {}
 
 void RendererDevice::ConvertToScreen(Triangle& tri) {
     for(int i = 0; i < 3; i++) {
-        // float x = static_cast<int>(0.5f * with + tri[i].ndcSpacePos.x * with);
-        // float y = static_cast<int>(0.5f * height + tri[i].ndcSpacePos.y * height);
         tri[i].screenSpacePos.x = static_cast<int>(0.5f * with + tri[i].ndcSpacePos.x * with) - 800.f;
         tri[i].screenSpacePos.y = static_cast<int>(0.5f * height + tri[i].ndcSpacePos.y * height) - 250.f;
         tri[i].screenDepth = tri[i].ndcSpacePos.z;
