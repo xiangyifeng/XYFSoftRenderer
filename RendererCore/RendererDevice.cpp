@@ -133,6 +133,7 @@ void RendererDevice::ProcessTriangle(Triangle& tri) {
     ExecutePerspectiveDivision(tri);
     ConvertToScreen(tri);
     if(renderMode == FACE) RasterizationTriangle(tri);
+    if(renderMode == EDGE) WireFrameTriangle(tri);
     //TO DO: WireframeTriangle and PointTriangle
 }
 
@@ -195,16 +196,67 @@ void RendererDevice::RasterizationTriangle(Triangle& tri) {
     }
 }
 
-void RendererDevice::WireFrameTriangle(Triangle& tri) {}
+void RendererDevice::WireFrameTriangle(Triangle& tri) {
+    Line triLine[3] =
+    {
+        {tri[0].screenSpacePos, tri[1].screenSpacePos},
+        {tri[1].screenSpacePos, tri[2].screenSpacePos},
+        {tri[2].screenSpacePos, tri[0].screenSpacePos},
+    };
+    for(auto &line : triLine)
+    {
+        //auto res = ClipLine(line);
+        DrawLine(line);
+    }
+}
 
 void RendererDevice::PointTriangle(Triangle& tri) {}
 
-void RendererDevice::DrawLine(Line& line) {}
+void RendererDevice::DrawLine(Line& line) {
+    int x0 = glm::clamp(static_cast<int>(line[0].x), 0, with - 1);
+    int x1 = glm::clamp(static_cast<int>(line[1].x), 0, with - 1);
+    int y0 = glm::clamp(static_cast<int>(line[0].y), 0, height - 1);
+    int y1 = glm::clamp(static_cast<int>(line[1].y), 0, height - 1);
+    bool steep = false;
+    if (abs(x0 - x1) < abs(y0 - y1))
+    {
+        std::swap(x0, y0);
+        std::swap(x1, y1);
+        steep = true;
+    }
+    if (x0 > x1)
+    {
+        std::swap(x0, x1);
+        std::swap(y0, y1);
+    }
+    int dx = x1 - x0;
+    int dy = y1 - y0;
+    int k = dy > 0 ? 1 : -1;
+    if (dy < 0)dy = -dy;
+    float e = -dx;
+    int x = x0, y = y0;
+    while (x != x1)
+    {
+        if (steep) {
+            framebuffer.SetPixel(y, x, LineColor);
+        }
+        else {
+            framebuffer.SetPixel(x, y, LineColor);
+        }
+        e += (2 * dy);
+        if (e > 0)
+        {
+            y += k;
+            e -= (2 * dx);
+        }
+        ++x;
+    }
+}
 
 void RendererDevice::ConvertToScreen(Triangle& tri) {
     for(int i = 0; i < 3; i++) {
-        tri[i].screenSpacePos.x = static_cast<int>(0.5f * with + tri[i].ndcSpacePos.x * with) - 800.f;
-        tri[i].screenSpacePos.y = static_cast<int>(0.5f * height + tri[i].ndcSpacePos.y * height) - 250.f;
+        tri[i].screenSpacePos.x = static_cast<int>(0.5f * with + tri[i].ndcSpacePos.x * with) - 1050.f;
+        tri[i].screenSpacePos.y = static_cast<int>(0.5f * height + tri[i].ndcSpacePos.y * height) - 550.f;
         tri[i].screenDepth = tri[i].ndcSpacePos.z;
     }
 }

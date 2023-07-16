@@ -43,7 +43,7 @@ struct Vertex {
 };
 
 using Triangle = std::array<Vertex, 3>;
-using Line = std::array<Vertex, 2>;
+using Line = std::array<Coord2D, 2>;
 
 struct Fragment {
     Coord3D worldSpacePos;

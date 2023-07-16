@@ -23,7 +23,7 @@ struct EdgeEquation {
 
 class RendererDevice {
 public:
-    RenderMode renderMode = FACE;
+    RenderMode renderMode = EDGE;
     bool faceCulling = false;
     bool multiThread = false;
     bool MSAA = false;
@@ -33,7 +33,7 @@ public:
     std::unique_ptr<Shader> shader;
     Color clearColor = {0.f, 0.f, 0.f};
     Color PointColor;
-    Color LineColor;
+    Color LineColor = {255.f, 255.f, 255.f};
     RendererDevice(int w, int h);
     void ClearBuffer();
     QImage& GetBuffer();
