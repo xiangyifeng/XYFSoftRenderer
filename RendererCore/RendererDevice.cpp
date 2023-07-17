@@ -258,8 +258,8 @@ void RendererDevice::DrawLine(Line& line) {
 
 void RendererDevice::ConvertToScreen(Triangle& tri) {
     for(int i = 0; i < 3; i++) {
-        tri[i].screenSpacePos.x = static_cast<int>(0.5f * with + tri[i].ndcSpacePos.x * with) - 1050.f;
-        tri[i].screenSpacePos.y = static_cast<int>(0.5f * height + tri[i].ndcSpacePos.y * height) - 550.f;
+        tri[i].screenSpacePos.x = static_cast<int>(0.5f * with + tri[i].ndcSpacePos.x * with) - 1000.f;
+        tri[i].screenSpacePos.y = static_cast<int>(0.5f * height + tri[i].ndcSpacePos.y * height) - 500.f;
         tri[i].screenDepth = tri[i].ndcSpacePos.z;
     }
 }

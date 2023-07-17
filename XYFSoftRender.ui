@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>768</width>
-    <height>526</height>
+    <width>756</width>
+    <height>466</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -370,8 +370,8 @@
      <rect>
       <x>10</x>
       <y>30</y>
-      <width>541</width>
-      <height>451</height>
+      <width>551</width>
+      <height>391</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="RenderWidgetLayout" rowminimumheight="600" columnminimumwidth="800">
@@ -386,24 +386,17 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>768</width>
+     <width>756</width>
      <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
     <property name="title">
-     <string>File</string>
+     <string>LoadModel</string>
     </property>
     <addaction name="actionOpen"/>
-    <addaction name="actionSave"/>
-   </widget>
-   <widget class="QMenu" name="menuSetting">
-    <property name="title">
-     <string>Setting</string>
-    </property>
    </widget>
    <addaction name="menu"/>
-   <addaction name="menuSetting"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionOpen">

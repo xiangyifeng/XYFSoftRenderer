@@ -28,8 +28,7 @@ using Matrix3x3 = glm::mat3;
 
 enum RenderMode {
     FACE,
-    EDGE,
-    VERTEX
+    EDGE
 };
 
 struct Vertex {
