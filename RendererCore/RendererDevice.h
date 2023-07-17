@@ -23,7 +23,7 @@ struct EdgeEquation {
 
 class RendererDevice {
 public:
-    RenderMode renderMode = EDGE;
+    RenderMode renderMode = FACE;
     bool faceCulling = false;
     bool multiThread = false;
     bool MSAA = false;

@@ -190,6 +190,15 @@ void XYFSoftRender::on_MSAACheckBox_clicked() {
     }
 }
 
+void XYFSoftRender::on_WireFrameCheckBox_clicked() {
+    if(ui->WireFrameCheckBox->isChecked()) {
+        RendererDevice::GetInstance().renderMode = EDGE;
+    }
+    else {
+        RendererDevice::GetInstance().renderMode = FACE;
+    }
+}
+
 void XYFSoftRender::on_FaceCullingCheckBox_clicked() {
     if(ui->FaceCullingCheckBox->isChecked()) {
         RendererDevice::GetInstance().SetFaceCulling(true);

@@ -64,4 +64,5 @@ private Q_SLOTS:
     void on_MultiThreadCheckBox_clicked();
     void on_FaceCullingCheckBox_clicked();
     void on_MSAACheckBox_clicked();
+    void on_WireFrameCheckBox_clicked();
 };
