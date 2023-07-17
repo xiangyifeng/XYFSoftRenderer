@@ -1,8 +1,8 @@
 #pragma once
 #include "RendererDevice.h"
 #include "DataDefine.hpp"
+#include <bitset>
 
-//当像素在边上时用Top-Left Fill Rule
 static inline bool JudgeOnTopLeftEdge(CoordI2D v0, CoordI2D v1) {
     return (v0.y > v1.y || (v0.y == v1.y && (v0.x > v1.x)));
 }
@@ -52,3 +52,32 @@ static inline T CorrectPerspectiveInterpolation(std::vector<T> attribute, Triang
 {
     return (barycentric.x * attribute[0] / tri[0].clipSpacePos.w + barycentric.y * attribute[1] / tri[1].clipSpacePos.w + barycentric.z * attribute[2] / tri[2].clipSpacePos.w) / (barycentric.x / tri[0].clipSpacePos.w + barycentric.y / tri[1].clipSpacePos.w + barycentric.z / tri[2].clipSpacePos.w);
 }
+
+template<class T>
+static inline float CalculateDistance(T point, T border)
+{
+    return glm::dot(point, border);
+}
+
+std::vector<Triangle> ConstructTriangle(std::vector<Vertex> vertexList)
+{
+    std::vector<Triangle> res;
+    for(int i = 0; i < vertexList.size() - 2; i++)
+    {
+        int k = (i + 1) % vertexList.size();
+        int m = (i + 2) % vertexList.size();
+        Triangle tri{vertexList[0], vertexList[k], vertexList[m]};
+        res.push_back(tri);
+    }
+    return res;
+}
+
+template<class T,size_t N>
+static inline std::bitset<N> GetClipCode(T point, std::array<T, N>& clip)
+{
+    std::bitset<N> res;
+    for(int i = 0; i < N; i++)
+        if(CalculateDistance(point, clip[i]) < 0) res.set(i, 1);
+    return res;
+}
+

@@ -2,6 +2,7 @@
 #include "RendererHelp.hpp"
 #include <vector>
 #include <omp.h>
+#include <bitset>
 
 
 RendererDevice* RendererDevice::instance = nullptr;
@@ -129,12 +130,15 @@ void RendererDevice::ProcessTriangle(Triangle& tri) {
     for(int i = 0; i < 3; i++) {
         shader->VertexShader(tri[i]);
     }
-    //TO DO:Clip Triangle
-    ExecutePerspectiveDivision(tri);
-    ConvertToScreen(tri);
-    if(renderMode == FACE) RasterizationTriangle(tri);
-    if(renderMode == EDGE) WireFrameTriangle(tri);
-    //TO DO: WireframeTriangle and PointTriangle
+
+    std::vector<Triangle> completedTriangleList = ClipTriangle(tri);
+    for (auto &ctri : completedTriangleList) {
+        ExecutePerspectiveDivision(ctri);
+        ConvertToScreen(ctri);
+        if(renderMode == FACE) RasterizationTriangle(ctri);
+        if(renderMode == EDGE) WireFrameTriangle(ctri);
+    }
+
 }
 
 void RendererDevice::RasterizationTriangle(Triangle& tri) {
@@ -205,7 +209,6 @@ void RendererDevice::WireFrameTriangle(Triangle& tri) {
     };
     for(auto &line : triLine)
     {
-        //auto res = ClipLine(line);
         DrawLine(line);
     }
 }
@@ -300,7 +303,47 @@ CoordI4D RendererDevice::GetBoundingBox(Triangle& tri) {
 }
 
 std::vector<Triangle> RendererDevice::ClipTriangle(Triangle& tri) {
-    return std::vector<Triangle>();
+    std::bitset<6> code[3] =
+    {
+        GetClipCode(tri[0].clipSpacePos, viewPlanes),
+        GetClipCode(tri[1].clipSpacePos, viewPlanes),
+        GetClipCode(tri[2].clipSpacePos, viewPlanes)
+    };
+    if((code[0] | code[1] | code[2]).none())
+        return {tri};
+    if((code[0] & code[1] & code[2]).any())
+        return {};
+    if(((code[0] ^ code[1])[0]) || ((code[1] ^ code[2])[0]) || ((code[2] ^ code[0])[0])) // intersects near plane
+    {
+        std::vector<Vertex> res;
+        for(int i = 0; i < 3; i++)
+        {
+            int k = (i + 1) % 3;
+            if(!code[i][0] && !code[k][0])
+            {
+                res.push_back(tri[k]);
+            }
+            else if(!code[i][0] && code[k][0])
+            {
+                float da = CalculateDistance(tri[i].clipSpacePos, viewPlanes[0]);
+                float db = CalculateDistance(tri[k].clipSpacePos, viewPlanes[0]);
+                float alpha = da / (da - db);
+                Vertex np = CalculateInterpolation(tri[i], tri[k], alpha);
+                res.push_back(np);
+            }
+            else if(code[i][0] && !code[k][0])
+            {
+                float da = CalculateDistance(tri[i].clipSpacePos, viewPlanes[0]);
+                float db = CalculateDistance(tri[k].clipSpacePos, viewPlanes[0]);
+                float alpha = da / (da - db);
+                Vertex np = CalculateInterpolation(tri[i], tri[k], alpha);
+                res.push_back(np);
+                res.push_back(tri[k]);
+            }
+        }
+        return ConstructTriangle(res);
+    }
+    return std::vector<Triangle>{tri};
 }
 
 std::optional<Line> RendererDevice::ClipLine(Line& line) {
