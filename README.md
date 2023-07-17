@@ -22,9 +22,9 @@
 ![图片](/Image/线框.PNG)
 MSAA
 MSAA前
-![图片](/Image/MSAA前(1).PNG) 
+![图片](/Image/MSAA前.PNG) 
 MSAA后
-![图片](/Image/MSAA后(1).PNG) 
+![图片](/Image/MSAA后.PNG) 
 多线程加速
 加速前
 ![图片](/Image/多线程前.PNG) 
