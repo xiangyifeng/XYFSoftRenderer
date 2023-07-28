@@ -4,7 +4,6 @@
 #include <omp.h>
 #include <bitset>
 
-
 RendererDevice* RendererDevice::instance = nullptr;
 
 EdgeEquation::EdgeEquation(const Triangle& tri) {
@@ -53,18 +52,20 @@ Vector3D EdgeEquation::GetBarycentric(Vector3D val) {
 }
 
 RendererDevice::RendererDevice(int w, int h) : shader(nullptr), with(w), height(h), framebuffer(w, h) {
-    //near
-    viewPlanes[0] = {0.f, 0.f, 1.f, 1.f};
-    //far
-    viewPlanes[1] = {0.f, 0.f, -1.f, 1.f};
-    //left
-    viewPlanes[2] = {1.f, 0.f, 0.f, 1.f};
-    //right
-    viewPlanes[3] = {-1.f, 0.f, 0.f, 1.f};
-    //top
-    viewPlanes[4] = {0.f, 1.f, 0.f, 1.f};
-    //bottom
-    viewPlanes[5] = {0.f, -1.f, 0.f, 1.f};
+    viewPlanes = {
+        Vector4D(0.f, 0.f, 1.f, 1.f),
+        Vector4D(0.f, 0.f, -1.f, 1.f),
+        Vector4D(1.f, 0.f, 0.f, 1.f),
+        Vector4D(-1.f, 0.f, 0.f, 1.f),
+        Vector4D(0.f, 1.f, 0.f, 1.f),
+        Vector4D(0.f, -1.f, 0.f, 1.f),
+    };
+    screenLines = {
+        Vector3D(-1,0,-1),
+        Vector3D(0,1,-1),
+        Vector3D(1,0,-1),
+        Vector3D(0,-1,-1)
+    };
 }
 
 void RendererDevice::ClearBuffer() {
@@ -161,7 +162,7 @@ void RendererDevice::RasterizationTriangle(Triangle& tri) {
                 bool isInside = false;
                 int count = 0;
                 Vector3D barycentric = edge.GetBarycentric(cx);
-                float depth = CalculateInterpolation<float>(tri[0].screenDepth, tri[1].screenDepth, tri[2].screenDepth, barycentric);
+                //float depth = CalculateInterpolation<float>(tri[0].screenDepth, tri[1].screenDepth, tri[2].screenDepth, barycentric);
                 for(int i = 0; i < 4; i++) {
                     float sampleX = (float)x + xOffset[i];
                     float sampleY = (float)y + yOffset[i];
@@ -305,45 +306,45 @@ CoordI4D RendererDevice::GetBoundingBox(Triangle& tri) {
 std::vector<Triangle> RendererDevice::ClipTriangle(Triangle& tri) {
     std::bitset<6> code[3] =
     {
-        GetClipCode(tri[0].clipSpacePos, viewPlanes),
-        GetClipCode(tri[1].clipSpacePos, viewPlanes),
-        GetClipCode(tri[2].clipSpacePos, viewPlanes)
+        GetClipCode<Vector4D, 6>(tri[0].clipSpacePos, viewPlanes),
+        GetClipCode<Vector4D, 6>(tri[1].clipSpacePos, viewPlanes),
+        GetClipCode<Vector4D, 6>(tri[2].clipSpacePos, viewPlanes)
     };
     if((code[0] | code[1] | code[2]).none())
         return {tri};
     if((code[0] & code[1] & code[2]).any())
         return {};
-    if(((code[0] ^ code[1])[0]) || ((code[1] ^ code[2])[0]) || ((code[2] ^ code[0])[0])) // intersects near plane
-    {
-        std::vector<Vertex> res;
-        for(int i = 0; i < 3; i++)
-        {
-            int k = (i + 1) % 3;
-            if(!code[i][0] && !code[k][0])
-            {
-                res.push_back(tri[k]);
+    std::vector<Vertex> res;
+    for(int i = 0; i < 3; i++) {
+        res.emplace_back(tri[i]);
+    }
+    for(int i = 0; i < 4; i++) {
+        std::vector<Vertex> input = res;
+        res.clear();
+        for(int j = 0; j < input.size(); j++) {
+            Vertex current = input[j];
+            Vertex last = input[(j + input.size() - 1) % input.size()];
+            if(Inside(screenLines[i], current.clipSpacePos)) {
+                if(!Inside(screenLines[i], last.clipSpacePos)) {
+                    Vertex intersection = ClipTriangleInterpolation(last, current, screenLines[i]);
+                    res.emplace_back(intersection);
+                }
+                res.emplace_back(current);
             }
-            else if(!code[i][0] && code[k][0])
-            {
-                float da = CalculateDistance(tri[i].clipSpacePos, viewPlanes[0]);
-                float db = CalculateDistance(tri[k].clipSpacePos, viewPlanes[0]);
-                float alpha = da / (da - db);
-                Vertex np = CalculateInterpolation(tri[i], tri[k], alpha);
-                res.push_back(np);
-            }
-            else if(code[i][0] && !code[k][0])
-            {
-                float da = CalculateDistance(tri[i].clipSpacePos, viewPlanes[0]);
-                float db = CalculateDistance(tri[k].clipSpacePos, viewPlanes[0]);
-                float alpha = da / (da - db);
-                Vertex np = CalculateInterpolation(tri[i], tri[k], alpha);
-                res.push_back(np);
-                res.push_back(tri[k]);
+            else if(Inside(screenLines[i], last.clipSpacePos)) {
+                Vertex intersection = ClipTriangleInterpolation(last, current, screenLines[i]);
+                res.emplace_back(intersection);
             }
         }
-        return ConstructTriangle(res);
     }
-    return std::vector<Triangle>{tri};
+    // if(((code[0] ^ code[1])[0]) || ((code[1] ^ code[2])[0]) || ((code[2] ^ code[0])[0])) // intersects near plane
+    // {
+    //     std::vector<Vertex> res;
+        
+        
+    // }
+    return ConstructTriangle(res);
+    //return std::vector<Triangle>{tri};
 }
 
 std::optional<Line> RendererDevice::ClipLine(Line& line) {

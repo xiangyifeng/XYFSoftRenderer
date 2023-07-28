@@ -16,7 +16,6 @@ XYFSoftRender::XYFSoftRender(QWidget* parent)
     myColorDialog = new QColorDialog();
     InitDevice();
     InitLight();
-    SetLightDir();
     connect(&timer, &QTimer::timeout, this, &XYFSoftRender::Render);
     connect(ui->RedLineEdit, SIGNAL(returnPressed()), this, SLOT(on_lightColorChange()));
     connect(ui->BlueLineEdit, SIGNAL(returnPressed()), this, SLOT(on_lightColorChange()));
@@ -92,6 +91,7 @@ void XYFSoftRender::InitLight() {
     ui->editColorButton->setFlat(true);
     lightDir = glm::normalize(Vector3D(1.f, 1.f, 1.f));
     SetLightColor(QColor(255, 255, 255));
+    SetLightDir();
 }
 
 void XYFSoftRender::SetLightColor(QColor color) {

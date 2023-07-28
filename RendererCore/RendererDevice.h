@@ -50,8 +50,8 @@ private:
     int height;
     FrameBuffer framebuffer;
     //FrameBuffer MSAAFramebuffer;
-    std::array<Vector4D, 6> viewPlanes;
-    std::array<Vector3D, 4> screenLines;
+    std::vector<Vector4D> viewPlanes;
+    std::vector<Vector3D> screenLines;
     std::array<float, 4> xOffset = {0.25f, 0.25f, 0.75f, 0.75f};
     std::array<float, 4> yOffset = {0.25f, 0.75f, 0.25f, 0.75f};
     void ProcessTriangle(Triangle& tri);
@@ -64,5 +64,6 @@ private:
     Fragment ConstructFragment(int x, int y, float z, Triangle& tri, Vector3D& barycentric);
     CoordI4D GetBoundingBox(Triangle& tri);
     std::vector<Triangle> ClipTriangle(Triangle& tri);
+    std::vector<Triangle> ClipTriangle2(Triangle& tri);
     std::optional<Line> ClipLine(Line& line);
 };

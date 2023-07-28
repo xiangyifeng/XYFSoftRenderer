@@ -73,7 +73,7 @@ std::vector<Triangle> ConstructTriangle(std::vector<Vertex> vertexList)
 }
 
 template<class T,size_t N>
-static inline std::bitset<N> GetClipCode(T point, std::array<T, N>& clip)
+static inline std::bitset<N> GetClipCode(T point, std::vector<T>& clip)
 {
     std::bitset<N> res;
     for(int i = 0; i < N; i++)
@@ -81,3 +81,45 @@ static inline std::bitset<N> GetClipCode(T point, std::array<T, N>& clip)
     return res;
 }
 
+static inline std::bitset<4> GetClipCode2(Coord4D point)
+{
+    std::bitset<4> res;
+    if(point.x < -1) {
+        res.set(0, 1);
+    }
+    if(point.x > 1) {
+        res.set(1, 1);
+    }
+    if(point.y < -1) {
+        res.set(2,1);
+    }
+    if(point.y > 1) {
+        res.set(3,1);
+    }
+    return res;
+}
+
+static inline bool Inside(const Vector3D &line,const Vector3D &p) {
+	return line.x * p.x + line.y * p.y + line.z < 0;
+}
+
+static inline Vertex ClipTriangleInterpolation(Vertex v1, Vertex v2, Vector3D line) {
+    Vertex res;
+    if (line.x == -1) {
+		float weight = (-1 - v1.clipSpacePos.x) / (v2.clipSpacePos.x - v1.clipSpacePos.x);
+		return CalculateInterpolation(v1, v2, weight);
+	}
+	if (line.x == 1) {
+		float weight = (1 - v1.clipSpacePos.x) / (v2.clipSpacePos.x - v1.clipSpacePos.x);
+		return CalculateInterpolation(v1, v2, weight);
+	}
+	if (line.y == -1) {
+		float weight = (-1 - v1.clipSpacePos.y) / (v2.clipSpacePos.y - v1.clipSpacePos.y);
+		return  CalculateInterpolation(v1, v2, weight);
+	}
+	if (line.y == 1) {
+		float weight = (1 - v1.clipSpacePos.y) / (v2.clipSpacePos.y - v1.clipSpacePos.y);
+		return CalculateInterpolation(v1, v2, weight);
+	}
+    return res;
+}
