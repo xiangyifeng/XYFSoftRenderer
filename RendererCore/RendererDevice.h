@@ -57,7 +57,6 @@ private:
     void ProcessTriangle(Triangle& tri);
     void RasterizationTriangle(Triangle& tri);
     void WireFrameTriangle(Triangle& tri);
-    void PointTriangle(Triangle& tri);
     void DrawLine(Line& line);
     void ConvertToScreen(Triangle& tri);
     void ExecutePerspectiveDivision(Triangle& tri);

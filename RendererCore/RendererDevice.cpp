@@ -214,7 +214,6 @@ void RendererDevice::WireFrameTriangle(Triangle& tri) {
     }
 }
 
-void RendererDevice::PointTriangle(Triangle& tri) {}
 
 void RendererDevice::DrawLine(Line& line) {
     int x0 = glm::clamp(static_cast<int>(line[0].x), 0, with - 1);
