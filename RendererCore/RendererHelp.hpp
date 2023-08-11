@@ -99,11 +99,11 @@ static inline std::bitset<4> GetClipCode2(Coord4D point)
     return res;
 }
 
-static inline bool Inside(const Vector3D &line,const Vector3D &p) {
-	return line.x * p.x + line.y * p.y + line.z < 0;
+static inline bool Inside(const Vector4D &line,const Vector4D &p) {
+	return line.x * p.x + line.y * p.y + line.z * p.z + line.w * p.w >= 0;
 }
 
-static inline Vertex ClipTriangleInterpolation(Vertex v1, Vertex v2, Vector3D line) {
+static inline Vertex ClipTriangleInterpolation(Vertex v1, Vertex v2, Vector4D line) {
     Vertex res;
     if (line.x == -1) {
 		float weight = (-1 - v1.clipSpacePos.x) / (v2.clipSpacePos.x - v1.clipSpacePos.x);
@@ -121,5 +121,29 @@ static inline Vertex ClipTriangleInterpolation(Vertex v1, Vertex v2, Vector3D li
 		float weight = (1 - v1.clipSpacePos.y) / (v2.clipSpacePos.y - v1.clipSpacePos.y);
 		return CalculateInterpolation(v1, v2, weight);
 	}
+    if (line.z == -1) {
+		float weight = (-1 - v1.clipSpacePos.z) / (v2.clipSpacePos.z - v1.clipSpacePos.z);
+		return  CalculateInterpolation(v1, v2, weight);
+	}
+	if (line.z == 1) {
+		float weight = (1 - v1.clipSpacePos.z) / (v2.clipSpacePos.z - v1.clipSpacePos.z);
+		return CalculateInterpolation(v1, v2, weight);
+	}
     return res;
+}
+
+static inline bool AllVertexsInside(const Vector4D &v1, const Vector4D &v2, const Vector4D &v3) {
+	if (v1.x > 1 || v1.x < -1)
+		return false;
+	if (v1.y > 1 || v1.y < -1)
+		return false;
+	if (v2.x > 1 || v2.x < -1)
+		return false;
+	if (v2.y > 1 || v2.y < -1)
+		return false;
+	if (v3.x > 1 || v3.x < -1)
+		return false;
+	if (v3.y > 1 || v3.y < -1)
+		return false;
+    return true;
 }

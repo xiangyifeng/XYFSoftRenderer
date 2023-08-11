@@ -30,7 +30,7 @@ public:
     std::vector<Vertex> vertexList;
     std::vector<unsigned> indices;
     std::vector<Texture> textureList;
-    std::unique_ptr<Shader> shader;
+    Shader* shader;
     Color clearColor = {0.f, 0.f, 0.f};
     Color PointColor;
     Color LineColor = {255.f, 255.f, 255.f};
@@ -50,8 +50,8 @@ private:
     int height;
     FrameBuffer framebuffer;
     //FrameBuffer MSAAFramebuffer;
-    std::vector<Vector4D> viewPlanes;
     std::vector<Vector3D> screenLines;
+    std::vector<Vector4D> ViewLines;
     std::array<float, 4> xOffset = {0.25f, 0.25f, 0.75f, 0.75f};
     std::array<float, 4> yOffset = {0.25f, 0.75f, 0.25f, 0.75f};
     void ProcessTriangle(Triangle& tri);

@@ -52,19 +52,25 @@ Vector3D EdgeEquation::GetBarycentric(Vector3D val) {
 }
 
 RendererDevice::RendererDevice(int w, int h) : shader(nullptr), with(w), height(h), framebuffer(w, h) {
-    viewPlanes = {
-        Vector4D(0.f, 0.f, 1.f, 1.f),
-        Vector4D(0.f, 0.f, -1.f, 1.f),
-        Vector4D(1.f, 0.f, 0.f, 1.f),
-        Vector4D(-1.f, 0.f, 0.f, 1.f),
-        Vector4D(0.f, 1.f, 0.f, 1.f),
-        Vector4D(0.f, -1.f, 0.f, 1.f),
-    };
     screenLines = {
         Vector3D(-1,0,-1),
         Vector3D(0,1,-1),
         Vector3D(1,0,-1),
         Vector3D(0,-1,-1)
+    };
+    ViewLines = {
+        //near
+        Vector4D(0,0,1,1),
+        //far
+        Vector4D(0,0,-1,1),
+        //left
+        Vector4D(1,0,0,1),
+        //right
+        Vector4D(-1,0,0,1),
+        //top 
+        Vector4D(0,-1,0,1),
+        //bottom
+        Vector4D(0,1,0,1)
     };
 }
 
@@ -303,47 +309,34 @@ CoordI4D RendererDevice::GetBoundingBox(Triangle& tri) {
 }
 
 std::vector<Triangle> RendererDevice::ClipTriangle(Triangle& tri) {
-    std::bitset<6> code[3] =
-    {
-        GetClipCode<Vector4D, 6>(tri[0].clipSpacePos, viewPlanes),
-        GetClipCode<Vector4D, 6>(tri[1].clipSpacePos, viewPlanes),
-        GetClipCode<Vector4D, 6>(tri[2].clipSpacePos, viewPlanes)
-    };
-    if((code[0] | code[1] | code[2]).none())
-        return {tri};
-    if((code[0] & code[1] & code[2]).any())
-        return {};
     std::vector<Vertex> res;
     for(int i = 0; i < 3; i++) {
         res.emplace_back(tri[i]);
     }
-    for(int i = 0; i < 4; i++) {
+    if(AllVertexsInside(res[0].clipSpacePos, res[1].clipSpacePos, res[2].clipSpacePos)) {
+        return {tri};
+    }
+    for(int i = 0; i < 6; i++) {
         std::vector<Vertex> input = res;
         res.clear();
         for(int j = 0; j < input.size(); j++) {
             Vertex current = input[j];
             Vertex last = input[(j + input.size() - 1) % input.size()];
-            if(Inside(screenLines[i], current.clipSpacePos)) {
-                if(!Inside(screenLines[i], last.clipSpacePos)) {
-                    Vertex intersection = ClipTriangleInterpolation(last, current, screenLines[i]);
+            if(Inside(ViewLines[i], current.clipSpacePos)) {
+                if(!Inside(ViewLines[i], last.clipSpacePos)) {
+                    Vertex intersection = ClipTriangleInterpolation(last, current, ViewLines[i]);
                     res.emplace_back(intersection);
                 }
                 res.emplace_back(current);
             }
-            else if(Inside(screenLines[i], last.clipSpacePos)) {
-                Vertex intersection = ClipTriangleInterpolation(last, current, screenLines[i]);
+            else if(Inside(ViewLines[i], last.clipSpacePos)) {
+                Vertex intersection = ClipTriangleInterpolation(last, current, ViewLines[i]);
                 res.emplace_back(intersection);
             }
         }
     }
-    // if(((code[0] ^ code[1])[0]) || ((code[1] ^ code[2])[0]) || ((code[2] ^ code[0])[0])) // intersects near plane
-    // {
-    //     std::vector<Vertex> res;
         
-        
-    // }
     return ConstructTriangle(res);
-    //return std::vector<Triangle>{tri};
 }
 
 std::optional<Line> RendererDevice::ClipLine(Line& line) {

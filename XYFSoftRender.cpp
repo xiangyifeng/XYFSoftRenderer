@@ -32,7 +32,7 @@ XYFSoftRender::~XYFSoftRender()
 
 void XYFSoftRender::InitDevice() {
     RendererDevice::Init(DEFAULT_WIDTH, DEFAULT_HEIGHT);
-    RendererDevice::GetInstance().shader = std::make_unique<BlinnPhongShader>();
+    RendererDevice::GetInstance().shader = new BlinnPhongShader();
     RendererDevice::GetInstance().shader->lightList.push_back(Light());
 }
 
